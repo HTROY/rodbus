@@ -5,7 +5,7 @@ use crate::service::traits::Service;
 use crate::service::validation::*;
 use crate::types::{AddressRange, Indexed};
 
-impl Service for crate::service::services::ReadInputRegisters {
+impl Service<'_> for crate::service::services::ReadInputRegisters {
     const REQUEST_FUNCTION_CODE: FunctionCode = FunctionCode::ReadInputRegisters;
 
     type ClientRequest = AddressRange;

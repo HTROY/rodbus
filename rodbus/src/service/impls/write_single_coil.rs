@@ -5,7 +5,7 @@ use crate::service::services::WriteSingleCoil;
 use crate::service::traits::Service;
 use crate::types::Indexed;
 
-impl Service for WriteSingleCoil {
+impl Service<'_> for WriteSingleCoil {
     const REQUEST_FUNCTION_CODE: FunctionCode = FunctionCode::WriteSingleCoil;
     type ClientRequest = Indexed<bool>;
     type ClientResponse = Indexed<bool>;

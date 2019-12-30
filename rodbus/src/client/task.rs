@@ -140,7 +140,7 @@ impl ClientLoop {
     async fn handle_request<S, T>(
         &mut self,
         io: &mut T,
-        srv: ServiceRequest<S>,
+        srv: ServiceRequest<'_, S>,
     ) -> Option<SessionError>
     where
         S: Service,

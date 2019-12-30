@@ -1,18 +1,20 @@
 use futures::future::FutureExt;
 use futures::select;
 use tokio::io::{AsyncRead, AsyncWrite, AsyncWriteExt};
+use std::ops::DerefMut;
+use log::{warn};
 
-use crate::error::details::ExceptionCode;
+use crate::error::details:: ExceptionCode;
 use crate::error::*;
 use crate::server::handler::{ServerHandler, ServerHandlerMap};
 use crate::server::validator::Validator;
 use crate::service::function::{FunctionCode, ADU};
-use crate::service::parse::{parse_write_multiple_coils, parse_write_multiple_registers};
-use crate::service::traits::ParseRequest;
+use crate::service::traits::{ParseRequest, Service};
 use crate::tcp::frame::{MBAPFormatter, MBAPParser};
 use crate::types::{AddressRange, Indexed};
 use crate::util::cursor::ReadCursor;
-use crate::util::frame::{Frame, FrameFormatter, FrameHeader, FramedReader};
+use crate::util::frame::{FrameFormatter, FrameHeader, FramedReader, Frame};
+use crate::service::services::ReadCoils;
 
 pub(crate) struct SessionTask<T, U>
 where
@@ -59,6 +61,34 @@ where
     pub(crate) async fn run(&mut self) -> std::result::Result<(), Error> {
         loop {
             self.run_one().await?;
+        }
+    }
+
+    async fn handle_request<S: Service>(&mut self, frame: &Frame, function: FunctionCode, cursor: &mut ReadCursor<'_>, handler: &mut ServerHandlerType<T>) -> Result<&[u8], Error> {
+        match S::ServerRequest::parse(cursor) {
+            Err(e) => {
+                warn!("error parsing {:?} request: {}", function, e);
+                self.writer.format(
+                    frame.header,
+                    &ADU::new(function.as_error(), &ExceptionCode::IllegalDataValue),
+                )
+            }
+            Ok(request) => match S::create_response(&request, handler.lock().await.deref_mut().deref_mut()) {
+                Err(ex) => self
+                    .writer
+                    .format(frame.header, &ADU::new(function.as_error(), &ex)),
+                Ok(value) => {
+                    if S::check_response_validity(&request, &value) {
+                        self.writer
+                            .format(frame.header, &ADU::new(function.get_value(), value))
+                    } else {
+                        self.writer.format(
+                            frame.header,
+                            &ADU::new(function.as_error(), &ExceptionCode::ServerDeviceFailure),
+                        )
+                    }
+                }
+            },
         }
     }
 
@@ -115,6 +145,7 @@ where
             let mut lock = handler.lock().await;
             let mut handler = Validator::wrap(lock.as_mut());
             match function {
+// FunctionCode::ReadCoils => self.handle_request::<ReadCoils>(&frame, function, &mut cursor, handler).await?,
                 FunctionCode::ReadCoils => match AddressRange::parse(&mut cursor) {
                     Err(e) => {
                         log::warn!("error parsing {:?} request: {}", function, e);

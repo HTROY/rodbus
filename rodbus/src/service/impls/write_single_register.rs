@@ -5,7 +5,7 @@ use crate::service::services::WriteSingleRegister;
 use crate::service::traits::Service;
 use crate::types::Indexed;
 
-impl Service for WriteSingleRegister {
+impl Service<'_> for WriteSingleRegister {
     const REQUEST_FUNCTION_CODE: FunctionCode = FunctionCode::WriteSingleRegister;
     type ClientRequest = Indexed<u16>;
     type ClientResponse = Indexed<u16>;

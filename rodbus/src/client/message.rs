@@ -9,18 +9,18 @@ use crate::types::UnitId;
 
 /// possible requests that can be sent through the channel
 /// each variant is just a wrapper around a ServiceRequest<S>
-pub enum Request {
-    ReadCoils(ServiceRequest<ReadCoils>),
-    ReadDiscreteInputs(ServiceRequest<ReadDiscreteInputs>),
-    ReadHoldingRegisters(ServiceRequest<ReadHoldingRegisters>),
-    ReadInputRegisters(ServiceRequest<ReadInputRegisters>),
-    WriteSingleCoil(ServiceRequest<WriteSingleCoil>),
-    WriteSingleRegister(ServiceRequest<WriteSingleRegister>),
+pub enum Request<'a> {
+    ReadCoils(ServiceRequest<'a, ReadCoils>),
+    ReadDiscreteInputs(ServiceRequest<'a, ReadDiscreteInputs>),
+    ReadHoldingRegisters(ServiceRequest<'a, ReadHoldingRegisters>),
+    ReadInputRegisters(ServiceRequest<'a, ReadInputRegisters>),
+    WriteSingleCoil(ServiceRequest<'a, WriteSingleCoil>),
+    WriteSingleRegister(ServiceRequest<'a, WriteSingleRegister>),
     WriteMultipleCoils(ServiceRequest<WriteMultipleCoils>),
     WriteMultipleRegisters(ServiceRequest<WriteMultipleRegisters>),
 }
 
-impl Request {
+impl<'a> Request<'a> {
     pub fn fail(self, err: Error) {
         match self {
             Request::ReadCoils(r) => r.fail(err),
@@ -37,14 +37,14 @@ impl Request {
 
 /// All of the information that the channel task
 /// needs to process the request
-pub struct ServiceRequest<S: Service> {
+pub struct ServiceRequest<'a, S: Service<'a>> {
     pub id: UnitId,
     pub timeout: Duration,
     pub argument: S::ClientRequest,
     reply_to: oneshot::Sender<Result<S::ClientResponse, Error>>,
 }
 
-impl<S: Service> ServiceRequest<S> {
+impl<'a, S: Service<'a>> ServiceRequest<'a, S> {
     pub fn new(
         id: UnitId,
         timeout: Duration,
