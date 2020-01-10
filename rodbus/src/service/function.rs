@@ -69,7 +69,7 @@ impl FunctionCode {
 
 pub struct ADU<'a, T>
 where
-    T: Serialize,
+    T: Serialize + ?Sized,
 {
     function: u8,
     body: &'a T,
@@ -77,7 +77,7 @@ where
 
 impl<'a, T> ADU<'a, T>
 where
-    T: Serialize,
+    T: Serialize + ?Sized,
 {
     pub fn new(function: u8, body: &'a T) -> Self {
         ADU { function, body }
@@ -86,7 +86,7 @@ where
 
 impl<'a, T> Serialize for ADU<'a, T>
 where
-    T: Serialize,
+    T: Serialize + ?Sized,
 {
     fn serialize(&self, cursor: &mut WriteCursor) -> Result<(), Error> {
         cursor.write_u8(self.function)?;

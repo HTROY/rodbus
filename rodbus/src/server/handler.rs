@@ -17,7 +17,7 @@ use crate::types::*;
 ///
 /// [`ExceptionCode::IllegalDataAddress`]: ../../error/details/enum.ExceptionCode.html#variant.IllegalDataAddress
 /// [`ExceptionCode::ServerDeviceFailure`]: ../../error/details/enum.ExceptionCode.html#variant.ServerDeviceFailure
-pub trait ServerHandler: Send + 'static {
+pub trait ServerHandler: Send {
     /// Moves a server handler implementation into a `Arc<Mutex<Box<ServerHandler>>>`
     /// suitable for passing to the server
     fn wrap(self) -> Arc<Mutex<Box<Self>>>
@@ -126,7 +126,7 @@ pub trait ServerHandler: Send + 'static {
     }
 }
 
-type ServerHandlerType<T> = Arc<Mutex<Box<T>>>;
+pub type ServerHandlerType<T> = Arc<Mutex<Box<T>>>;
 
 /// A type that hides the underlying map implementation
 /// and allows lookups of a [`ServerHandler`] from a [`UnitId`]

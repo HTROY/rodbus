@@ -41,36 +41,41 @@ where
         }
         result
     }
+}
 
-    pub fn read_coils(&mut self, range: AddressRange) -> Result<&[bool], ExceptionCode> {
+impl<'a, T> ServerHandler for Validator<'a, T>
+where
+    T: ServerHandler,
+{
+    fn read_coils(&mut self, range: AddressRange) -> Result<&[bool], ExceptionCode> {
         Self::validate_range(range)?;
         Self::validate_result(range, self.inner.read_coils(range))
     }
 
-    pub fn read_discrete_inputs(&mut self, range: AddressRange) -> Result<&[bool], ExceptionCode> {
+    fn read_discrete_inputs(&mut self, range: AddressRange) -> Result<&[bool], ExceptionCode> {
         Self::validate_range(range)?;
         Self::validate_result(range, self.inner.read_discrete_inputs(range))
     }
 
-    pub fn read_holding_registers(&mut self, range: AddressRange) -> Result<&[u16], ExceptionCode> {
+    fn read_holding_registers(&mut self, range: AddressRange) -> Result<&[u16], ExceptionCode> {
         Self::validate_range(range)?;
         Self::validate_result(range, self.inner.read_holding_registers(range))
     }
 
-    pub fn read_input_registers(&mut self, range: AddressRange) -> Result<&[u16], ExceptionCode> {
+    fn read_input_registers(&mut self, range: AddressRange) -> Result<&[u16], ExceptionCode> {
         Self::validate_range(range)?;
         Self::validate_result(range, self.inner.read_input_registers(range))
     }
 
-    pub fn write_single_coil(&mut self, value: Indexed<bool>) -> Result<(), ExceptionCode> {
+    fn write_single_coil(&mut self, value: Indexed<bool>) -> Result<(), ExceptionCode> {
         self.inner.write_single_coil(value)
     }
 
-    pub fn write_single_register(&mut self, value: Indexed<u16>) -> Result<(), ExceptionCode> {
+    fn write_single_register(&mut self, value: Indexed<u16>) -> Result<(), ExceptionCode> {
         self.inner.write_single_register(value)
     }
 
-    pub fn write_multiple_coils(
+    fn write_multiple_coils(
         &mut self,
         range: AddressRange,
         iter: BitIterator,
@@ -79,7 +84,7 @@ where
         self.inner.write_multiple_coils(range, iter)
     }
 
-    pub fn write_multiple_registers(
+    fn write_multiple_registers(
         &mut self,
         range: AddressRange,
         iter: RegisterIterator,

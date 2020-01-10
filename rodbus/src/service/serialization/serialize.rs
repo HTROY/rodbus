@@ -36,6 +36,37 @@ impl Serialize for Indexed<u16> {
     }
 }
 
+impl Serialize for [bool] {
+    fn serialize(&self, cursor: &mut WriteCursor) -> Result<(), Error> {
+        // how many bytes should we have?
+        let num_bytes: u8 = {
+            let div_8 = self.len() / 8;
+
+            let count = if self.len() % 8 == 0 {
+                div_8
+            } else {
+                div_8 + 1
+            };
+
+            u8::try_from(count).map_err(|_| details::InternalError::BadByteCount(count))?
+        };
+
+        cursor.write_u8(num_bytes)?;
+
+        for byte in self.chunks(8) {
+            let mut acc: u8 = 0;
+            for (count, bit) in byte.iter().enumerate() {
+                if *bit {
+                    acc |= 1 << count as u8;
+                }
+            }
+            cursor.write_u8(acc)?;
+        }
+
+        Ok(())
+    }
+}
+
 impl Serialize for &[bool] {
     fn serialize(&self, cursor: &mut WriteCursor) -> Result<(), Error> {
         // how many bytes should we have?
@@ -84,6 +115,23 @@ impl Serialize for &[u16] {
     }
 }
 
+impl Serialize for [u16] {
+    fn serialize(&self, cursor: &mut WriteCursor) -> Result<(), Error> {
+        let num_bytes = {
+            let count = 2 * self.len();
+            u8::try_from(count).map_err(|_| details::InternalError::BadByteCount(count))?
+        };
+
+        cursor.write_u8(num_bytes)?;
+
+        for value in self {
+            cursor.write_u16_be(*value)?
+        }
+
+        Ok(())
+    }
+}
+
 impl Serialize for WriteMultiple<bool> {
     fn serialize(&self, cursor: &mut WriteCursor) -> Result<(), Error> {
         self.to_address_range()?.serialize(cursor)?;
@@ -95,6 +143,12 @@ impl Serialize for WriteMultiple<u16> {
     fn serialize(&self, cursor: &mut WriteCursor) -> Result<(), Error> {
         self.to_address_range()?.serialize(cursor)?;
         self.values.as_slice().serialize(cursor)
+    }
+}
+
+impl Serialize for () {
+    fn serialize(&self, _cursor: &mut WriteCursor) -> Result<(), Error> {
+        Ok(())
     }
 }
 

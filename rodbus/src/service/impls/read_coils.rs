@@ -7,20 +7,16 @@ use crate::types::{AddressRange, Indexed};
 use crate::error::details::ExceptionCode;
 use crate::server::handler::ServerHandler;
 
-impl<'a> Service<'a> for crate::service::services::ReadCoils {
+impl Service for crate::service::services::ReadCoils {
     const REQUEST_FUNCTION_CODE: FunctionCode = FunctionCode::ReadCoils;
 
     type ClientRequest = AddressRange;
     type ClientResponse = Vec<Indexed<bool>>;
     type ServerRequest = AddressRange;
-    type ServerResponse = &'a [bool];
+    type ServerResponse = [bool];
 
-    fn create_response<S: ServerHandler>(request: &Self::ServerRequest, handler: &'a mut S) -> Result<Self::ServerResponse, ExceptionCode> {
+    fn create_response<'a, S: ServerHandler>(request: &Self::ServerRequest, handler: &'a mut S) -> Result<&'a Self::ServerResponse, ExceptionCode> {
         handler.read_coils(*request)
-    }
-
-    fn check_response_validity(request: &Self::ServerRequest, response: &Self::ServerResponse) -> bool {
-        true
     }
 
     fn check_request_validity(

@@ -19,7 +19,7 @@ pub(crate) mod validator;
 /// * `handlers` - A map of handlers keyed by a unit id
 ///
 /// [`create_tcp_server_task`]: fn.create_tcp_server_task.html
-pub fn spawn_tcp_server_task<T: ServerHandler>(
+pub fn spawn_tcp_server_task<T: ServerHandler + 'static>(
     max_sessions: usize,
     listener: TcpListener,
     handlers: ServerHandlerMap<T>,
@@ -39,7 +39,7 @@ pub fn spawn_tcp_server_task<T: ServerHandler>(
 /// * `handlers` - A map of handlers keyed by a unit id
 ///
 /// [`spawn_tcp_server_task`]: fn.spawn_tcp_server_task.html
-pub async fn create_tcp_server_task<T: ServerHandler>(
+pub async fn create_tcp_server_task<T: ServerHandler + 'static>(
     max_sessions: usize,
     listener: TcpListener,
     handlers: ServerHandlerMap<T>,

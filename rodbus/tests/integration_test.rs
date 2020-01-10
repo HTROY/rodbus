@@ -125,6 +125,7 @@ async fn test_requests_and_responses() {
         vec![Indexed::new(0, 0xCAFE), Indexed::new(1, 0x0000)]
     );
 
+    /*
     // do a single coil write and verify that it was written by reading it
     assert_eq!(
         session
@@ -153,7 +154,6 @@ async fn test_requests_and_responses() {
             .unwrap(),
         vec![Indexed::new(0, 0x0000), Indexed::new(1, 0xABCD)]
     );
-
     // write multiple coils and verify that they were written
     assert_eq!(
         session
@@ -189,7 +189,7 @@ async fn test_requests_and_responses() {
             Indexed::new(1, 0x0304),
             Indexed::new(2, 0x0506)
         ]
-    );
+    );*/
 }
 
 #[test]

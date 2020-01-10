@@ -61,7 +61,7 @@ pub struct ServerTask<T: ServerHandler> {
 
 impl<T> ServerTask<T>
 where
-    T: ServerHandler,
+    T: ServerHandler + 'static,
 {
     pub fn new(max_sessions: usize, listener: TcpListener, handlers: ServerHandlerMap<T>) -> Self {
         Self {

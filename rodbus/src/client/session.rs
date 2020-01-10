@@ -133,7 +133,7 @@ impl CallbackSession {
 
     fn start_request<S, C>(&mut self, runtime: &mut Runtime, request: S::ClientRequest, callback: C)
     where
-        S: Service + 'static,
+        S: Service,
         C: FnOnce(Result<S::ClientResponse, Error>) + Send + Sync + 'static,
     {
         let mut session = self.inner.clone();

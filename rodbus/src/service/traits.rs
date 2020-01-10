@@ -19,7 +19,8 @@ pub trait ParseRequest: Sized {
     fn parse(cursor: &mut ReadCursor) -> Result<Self, Error>;
 }
 
-pub trait Service<'a>: Sized {
+pub trait Service: Sized
+{
     const REQUEST_FUNCTION_CODE: FunctionCode;
     const REQUEST_FUNCTION_CODE_VALUE: u8 = Self::REQUEST_FUNCTION_CODE.get_value();
     const RESPONSE_ERROR_CODE_VALUE: u8 = Self::REQUEST_FUNCTION_CODE_VALUE | ERROR_DELIMITER;
@@ -31,11 +32,9 @@ pub trait Service<'a>: Sized {
     type ClientResponse: ParseResponse<Self::ClientRequest> + Send + Sync + 'static;
 
     type ServerRequest: ParseRequest + Send + Sync + 'static;
+    type ServerResponse: Serialize + Send + Sync + ?Sized;
 
-    //type ServerResponse: Serialize + Send + Sync + 'a;
-
-    fn create_response<S: ServerHandler>(request: &Self::ServerRequest, handler: &'a mut S) -> Result<&'a dyn Serialize, ExceptionCode>;
-    fn check_response_validity(request: &Self::ServerRequest, response: &Self::ServerResponse) -> bool;
+    fn create_response<'a, S: ServerHandler>(request: &Self::ServerRequest, handler: &'a mut S) -> Result<&'a Self::ServerResponse, ExceptionCode>;
 
     /// check the validity of a request
     fn check_request_validity(request: &Self::ClientRequest)
